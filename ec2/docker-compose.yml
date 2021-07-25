@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  mariadb_external_db:
+    image: bitnami/mariadb:latest
+    environment:
+      - MARIADB_USER=bn_moodle
+      - MARIADB_DATABASE=bitnami_moodle
+      - MARIADB_PASSWORD=bitnami
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - "mariadb_data:/bitnami"
+    networks:
+      - database
+
+  moodle:
+    image: bitnami/moodle:latest
+    environment:
+      - PHP_UPLOAD_MAX_FILESIZE=2048M
+      - PHP_POST_MAX_SIZE=1024M
+      - PHP_MAX_EXECUTION_TIME=120
+      # - MOODLE_SKIP_BOOTSTRAP=yes
+      # - MOODLE_SKIP_INSTALL=yes
+      - BITNAMI_DEBUG=true
+      # - MOODLE_DATABASE_HOST=<IP_ADDRESS>
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - MOODLE_DATABASE_PASSWORD=bitnami
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=Admin-123
+      - MOODLE_EMAIL=andrianovsky95@gmail.com
+      - MOODLE_SITE_NAME='Moodle LMS Test Site'
+    volumes:
+      - "moodle_data:/bitnami"
+    ports:
+      - 80:8080
+    depends_on:
+      - mariadb_external_db
+    networks:
+      - database
+
+networks:
+  database:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  moodle_data:
