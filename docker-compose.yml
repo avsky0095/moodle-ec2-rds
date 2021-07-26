@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.7"
 
 services:
   mariadb_external_db:
@@ -22,7 +22,7 @@ services:
       # - MOODLE_SKIP_BOOTSTRAP=yes
       # - MOODLE_SKIP_INSTALL=yes
       - BITNAMI_DEBUG=true
-      # - MOODLE_DATABASE_HOST=<IP_ADDRESS>
+      - MOODLE_DATABASE_HOST=mariadb
       - MOODLE_DATABASE_PORT_NUMBER=3306
       - MOODLE_DATABASE_USER=bn_moodle
       - MOODLE_DATABASE_NAME=bitnami_moodle

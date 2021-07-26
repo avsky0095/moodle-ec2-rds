@@ -1,3 +1,4 @@
 credentials
-*/ec2-moodle.pem
-*/*terraform*
+ec2-moodle.pem
+*terraform*
+trash
