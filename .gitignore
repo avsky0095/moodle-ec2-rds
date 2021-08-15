@@ -2,5 +2,8 @@ credentials
 ec2-moodle.pem
 *terraform*
 trash
-resources
-*.
+config*
+
+dockerfile-build/blocks
+dockerfile-build/mod
+dockerfile-build/docker-*

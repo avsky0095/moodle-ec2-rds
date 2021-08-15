@@ -9,7 +9,7 @@ terraform {
 
 provider "aws" {
   region                  = "us-east-1"
-  shared_credentials_file = "credentials"
+  shared_credentials_file = "credentials"                       # alamat file credentials
 }
 
 
@@ -18,10 +18,10 @@ provider "aws" {
 #################################
 
 resource "aws_db_instance" "moodle-rds"  {
-  engine                  = "mariadb"                             # Database engine
-  engine_version          = "10.4.13"                            # Versi database
+  engine                  = "mariadb"                           # Database engine
+  engine_version          = "10.4.13"                           # Versi database
 
-  instance_class          = "db.t2.small"                       # 1 vCPU, 2 RAM
+  instance_class          = "db.t2.small"                       # 1 CPU, 2 RAM
   storage_type            = "gp2"                               # General Purpose 2
   allocated_storage       = 5                                   # 5 GB
   max_allocated_storage   = 0                                   # disable autoscaling
@@ -62,7 +62,7 @@ resource "aws_instance" "moodle-ec2" {
   ]
 
   ami                     = "ami-09e67e426f25ce0d7"             # Ubuntu 20.04 LTS 64 bit
-  instance_type           = "t2.small"                          # 1 vCPU, 2 RAM
+  instance_type           = "t2.small"                          # 1 CPU, 2 RAM
   key_name                = "ec2-moodle"                        # private key file
   vpc_security_group_ids  = [aws_security_group.moodle-ec2.id]  # Security group rules
   availability_zone       = "us-east-1f"                        # Northern Virginia, US
