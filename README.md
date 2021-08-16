@@ -4,9 +4,9 @@ Terraform configuration script
 # main.tf
 # required: AWS credentials file
 
-terraform init
-terraform plan
-terraform apply
+- terraform init
+- terraform plan
+- terraform apply
 
 Alur eksekusi:
 - main.tf
