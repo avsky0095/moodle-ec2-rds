@@ -1,0 +1,86 @@
+version: '3.7'
+services:
+  prometheus:
+    container_name: prometheus_metric
+    image: prom/prometheus:v2.29.2
+    ports:
+      - 9090:9090
+    volumes: 
+      - /home/ubuntu/prometheus.yml:/etc/prometheus/prometheus.yml      # local ubuntu > docker prom
+      - prometheus_data:/prometheus
+    networks: 
+      - net
+
+  node_exporter:
+    container_name: node_exporter
+    ports: 
+      - 9100:9100
+    image: prom/node-exporter:v1.2.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points"
+      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+    networks: 
+      - net
+
+  grafana:
+    container_name: grafana_monitor
+    image: grafana/grafana:8.1.2
+    ports: 
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks: 
+      - net
+
+  moodle:
+    container_name: moodle
+    image: andrianovsky/moodle-bitnami-3.11.2-env:latest
+    ports:
+      - '80:8080'
+    environment:
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=admin123
+      - MOODLE_EMAIL=user@student.id
+      - MOODLE_SITE_NAME=Moodle Test Site
+
+      - MOODLE_DATABASE_HOST=rds-moodle-test.chngnw3p2ako.us-east-1.rds.amazonaws.com
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_NAME=rds_moodle                   
+      - MOODLE_DATABASE_USER=user
+      - MOODLE_DATABASE_PASSWORD=user123!
+      - ALLOW_EMPTY_PASSWORD=yes
+
+      - PHP_UPLOAD_MAX_FILESIZE=2048M
+      - PHP_POST_MAX_SIZE=1024M
+      - PHP_MAX_EXECUTION_TIME=120
+      
+      - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
+      - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
+      - BITNAMI_DEBUG=true                                # tampilkan log
+    volumes:
+      - 'moodle_data:/bitnami/moodle'
+      - 'moodledata_data:/bitnami/moodledata'
+    networks: 
+      - net
+
+networks: 
+  net:
+    name: moodle_net
+    driver: bridge
+
+volumes:
+  moodle_data:
+  moodledata_data:
+  mariadb_data:                    # def: overlay
+  prometheus_data:
+  grafana_data:

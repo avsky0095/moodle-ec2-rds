@@ -1,0 +1,128 @@
+#
+# LOCAL TESTING
+#
+# Hanya untuk keperluan pengujian lokal
+#
+
+version: '3.7'
+services:
+  mariadb:
+    container_name: mariadb
+    image: 'bitnami/mariadb:10.5'
+    environment: 
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=user
+      - MARIADB_DATABASE=db
+      - MARIADB_SKIP_TEST_DB=yes
+    # command:
+    #   - mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+    ports: 
+      - '3306'
+    volumes: 
+      - 'mariadb_data:/bitnami/mariadb'
+      # - '/bitnami/mariadb'
+    networks: 
+      - net
+
+  moodle:
+    image: andrianovsky/moodle-bitnami-3.11.2-env:latest
+    container_name: moodle
+    # image: moodle_local
+    # depends_on: redis
+    # links: 
+    #   - redis
+    ports:
+      - '80:8080'
+      # - '8060:8060'
+      # - '443:8443'
+    environment:
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=admin123
+      - MOODLE_EMAIL=user@student.com
+      - MOODLE_SITE_NAME=Moodle Test Site
+
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_NAME=db                   
+      - MOODLE_DATABASE_USER=user
+      # - MOODLE_DATABASE_PASSWORD=user123!
+      - ALLOW_EMPTY_PASSWORD=yes
+
+      - PHP_UPLOAD_MAX_FILESIZE=2048M
+      - PHP_POST_MAX_SIZE=1024M
+      - PHP_MAX_EXECUTION_TIME=120
+      
+      - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
+      - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
+      - BITNAMI_DEBUG=true
+    volumes:
+      - 'moodle_data:/bitnami/moodle'
+      - 'moodledata_data:/bitnami/moodledata'
+      # - '/bitnami/moodle'
+      # - '/bitnami/moodledata'
+    networks: 
+      - net
+
+  prometheus:
+    container_name: prometheus_metric
+    image: prom/prometheus:v2.29.2
+    ports:
+      - 9090:9090
+    # environment: 
+    #   - ALLOW_EMPTY_PASSWORD=yes
+    volumes: 
+      # - /run/media/andrianovsky/DIRECTORY DATABASE/Documents/#1 College Documents/1. SKRIPSI/[NOW] Moodle on AWS/Script/assets/dockerfile-build/moodle/prometheus.yml:/etc/prometheus/prometheus.yml
+      # - ./configs/prometheus:/etc/prometheus
+      - ../configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prom_data:/prometheus
+    networks: 
+      - net
+
+  node_exporter:
+    container_name: node_exporter
+    ports: 
+      - 9100:9100
+    image: prom/node-exporter:v1.2.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points"
+      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+    restart: unless-stopped
+    # network_mode: host
+    networks: 
+      - net
+
+  grafana:
+    container_name: grafana_monitor
+    image: grafana/grafana:8.1.2
+    ports: 
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # - ./configs//grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    # restart: unless-stopped
+    # user: "472"
+    networks: 
+      - net
+
+networks: 
+  net:
+    name: moodle_net
+    driver: bridge
+
+volumes:
+  moodle_data:
+  moodledata_data:
+  mariadb_data:                    # def: overlay
+  prom_data:
+  grafana_data:

@@ -1,9 +1,12 @@
-credentials
-ec2-moodle.pem
 *terraform*
-trash
 config*
+aws-*
+ec2-*
+variable.tf
 
-dockerfile-build/blocks
-dockerfile-build/mod
-dockerfile-build/docker-*
+assets/ansible
+assets/x-archives
+assets/verifykeys/aws-*
+assets/verifykeys/ec2-*
+assets/dockerfile-build/config
+assets/dockerfile-build/moodle/plugins

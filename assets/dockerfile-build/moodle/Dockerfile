@@ -4,8 +4,8 @@ FROM andrianovsky/moodle-bitnami-3.11.2-env:latest
 # Copy dari local file
 # Admin Presets, Attendance, Big Blue Button bn, Jitsi, Oublog, Questionnaire, Subcourse, Webexactivity, Zoom
 
-COPY ./mod/ /opt/bitnami/moodle/mod/
-COPY ./blocks/ /opt/bitnami/moodle/blocks/
+COPY ./plugins/moodle/ /opt/bitnami/moodle/
+COPY ./plugins/opt/ /opt/bitnami/opt/
 
 # enable environment
 
