@@ -4,44 +4,79 @@
 # Hanya untuk keperluan pengujian lokal
 #
 
-version: '3.7'
+networks: 
+  net:
+    name: moodle_net
+    driver: bridge
+
+volumes:
+  moodle_data:
+  moodledata_data:
+  mariadb_data:                    # def: overlay
+  mariadb_data_rr:                    # def: overlay
+  # prom_data:
+  # grafana_data:
+  # redis_data:
+
+version: '3.9'
 services:
-  mariadb:
+  mariadb_master:
     container_name: mariadb
     image: 'bitnami/mariadb:10.5'
+    
     environment: 
       - ALLOW_EMPTY_PASSWORD=yes
       - MARIADB_USER=user
+      # - MARIADB_ROOT_USER=root
+      # - MARIADB_PASSWORD=pass
       - MARIADB_DATABASE=db
       - MARIADB_SKIP_TEST_DB=yes
-    # command:
-    #   - mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_ROOT_PASSWORD=master_root_password
     ports: 
-      - '3306'
+      - '3306:3306/tcp'
     volumes: 
-      - 'mariadb_data:/bitnami/mariadb'
-      # - '/bitnami/mariadb'
+      - mariadb_data:/bitnami/mariadb
     networks: 
       - net
 
+  mariadb_readreplica:
+    container_name: mariadb_slave
+    image: 'bitnami/mariadb:10.5'
+    environment: 
+      # - MARIADB_USER=user
+      # - MARIADB_PASSWORD=pass
+      # - MARIADB_DATABASE=db
+      - MARIADB_SKIP_TEST_DB=yes
+      # - MARIADB_ROOT_USER=root
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_MASTER_HOST=mariadb_master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=master_root_password        
+    ports: 
+      - '3307:3306/tcp'
+    volumes: 
+      - mariadb_data_rr:/bitnami/mariadb
+    networks: 
+      - net      
+
   moodle:
-    image: andrianovsky/moodle-bitnami-3.11.2-env:latest
+    image: andrianovsky/moodle-3.11.2:latest
     container_name: moodle
-    # image: moodle_local
-    # depends_on: redis
-    # links: 
-    #   - redis
     ports:
       - '80:8080'
-      # - '8060:8060'
-      # - '443:8443'
     environment:
       - MOODLE_USERNAME=admin
       - MOODLE_PASSWORD=admin123
       - MOODLE_EMAIL=user@student.com
       - MOODLE_SITE_NAME=Moodle Test Site
 
-      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_HOST=mariadb_master
       - MOODLE_DATABASE_PORT_NUMBER=3306
       - MOODLE_DATABASE_NAME=db                   
       - MOODLE_DATABASE_USER=user
@@ -56,25 +91,23 @@ services:
       - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
       - BITNAMI_DEBUG=true
     volumes:
-      - 'moodle_data:/bitnami/moodle'
-      - 'moodledata_data:/bitnami/moodledata'
-      # - '/bitnami/moodle'
-      # - '/bitnami/moodledata'
+      - /etc/localtime:/etc/localtime
+      - moodle_data:/bitnami/moodle
+      - moodledata_data:/bitnami/moodledata
+      - ./moodle/config.php:/bitnami/moodle/config.php
     networks: 
       - net
+    restart: always
 
   prometheus:
     container_name: prometheus_metric
     image: prom/prometheus:v2.29.2
     ports:
       - 9090:9090
-    # environment: 
-    #   - ALLOW_EMPTY_PASSWORD=yes
+    # environment:
     volumes: 
-      # - /run/media/andrianovsky/DIRECTORY DATABASE/Documents/#1 College Documents/1. SKRIPSI/[NOW] Moodle on AWS/Script/assets/dockerfile-build/moodle/prometheus.yml:/etc/prometheus/prometheus.yml
-      # - ./configs/prometheus:/etc/prometheus
-      - ../configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prom_data:/prometheus
+     - ./configs/prometheus:/etc/prometheus
+    #  - prom_data:/prometheus
     networks: 
       - net
 
@@ -103,26 +136,22 @@ services:
     ports: 
       - 3000:3000
     volumes:
-      - grafana_data:/var/lib/grafana
-      # - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      # - ./configs//grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      # - grafana_data:/var/lib/grafana
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
-    # restart: unless-stopped
-    # user: "472"
     networks: 
       - net
 
-networks: 
-  net:
-    name: moodle_net
-    driver: bridge
-
-volumes:
-  moodle_data:
-  moodledata_data:
-  mariadb_data:                    # def: overlay
-  prom_data:
-  grafana_data:
+  # redis:
+  #   container_name: redis_test
+  #   image: bitnami/redis:6.0.15
+  #   ports: 
+  #     - 6379:6379
+  #   environment: 
+  #     - ALLOW_EMPTY_PASSWORD=yes
+    # volumes: 
+    #   - redis_data:/bitnami/redis/data  

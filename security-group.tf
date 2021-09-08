@@ -9,24 +9,6 @@ resource "aws_security_group" "moodle-ec2" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
-  
-  # ingress {
-  #   description      = "HTTP"
-  #   from_port        = 80
-  #   to_port          = 80
-  #   protocol         = "tcp"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
-
-  # ingress {
-  #   description      = "SSH"
-  #   from_port        = 22
-  #   to_port          = 22
-  #   protocol         = "tcp"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
 
   # Allow all Outbound 
   egress {
@@ -47,15 +29,6 @@ resource "aws_security_group" "moodle-rds" {
     cidr_blocks      = ["0.0.0.0/0"]
     description      = "MySQL access from within VPC"
   }
-
-  # ingress {
-  #   description      = "SSH"
-  #   from_port        = 22
-  #   to_port          = 22
-  #   protocol         = "tcp"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
 
   egress {
     from_port        = 0

@@ -1,12 +1,8 @@
 *terraform*
-config*
 aws-*
 ec2-*
-variable.tf
 
-assets/ansible
 assets/x-archives
 assets/verifykeys/aws-*
 assets/verifykeys/ec2-*
-assets/dockerfile-build/config
-assets/dockerfile-build/moodle/plugins
+assets/local-testing/moodle/plugins
