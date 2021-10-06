@@ -64,10 +64,10 @@ output "rds_address" {
   value                   = [aws_db_instance.moodle-rds.address]
 }
 
-output "rds_address_rr" {
-  description             = "The hostname of the RDS instance"
-  value                   = [aws_db_instance.moodle-rds-readreplica.address]
-}
+# output "rds_address_rr" {
+#   description             = "The hostname of the RDS instance"
+#   value                   = [aws_db_instance.moodle-rds-readreplica.address]
+# }
 
 
 #----- ANSIBLE GET IP

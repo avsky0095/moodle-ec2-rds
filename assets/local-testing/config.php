@@ -6,23 +6,23 @@ $CFG = new stdClass();
 
 $CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
-$CFG->dbhost    = 'rds-moodle.chngnw3p2ako.us-east-1.rds.amazonaws.com';
-$CFG->dbname    = 'db_moodle';
+$CFG->dbhost    = 'mariadb_master';
+$CFG->dbname    = 'db';
 $CFG->dbuser    = 'user';
-$CFG->dbpass    = 'user123!';
+$CFG->dbpass    = '';
 $CFG->prefix    = 'mdl_';
 $CFG->dboptions = array(
-  'dbpersist' => false,
-  'dbsocket'  => false,
-  'dbport'    => '3306',
-  'dbhandlesoptions' => false,
-  'dbcollation' => 'utf8mb4_unicode_ci',
-  'connecttimeout' => null,
-  'readonly' => [          
-      'instance' => getenv('MOODLE_DATABASE_READREPLICA_HOST'),
-      'connecttimeout' => 2,
-      'latency' => 0.5,
-  ]
+    'dbpersist' => false,
+    'dbsocket'  => false,
+    'dbport'    => '3306',
+    'dbhandlesoptions' => false,
+    'dbcollation' => 'utf8mb4_unicode_ci',
+    'connecttimeout' => null,
+    'readonly' => [          
+        'instance' => getenv('MOODLE_DATABASE_READREPLICA_HOST'),
+        'connecttimeout' => 2,
+        'latency' => 0.5,
+    ]
 );
 
 if (empty($_SERVER['HTTP_HOST'])) {
@@ -38,10 +38,10 @@ $CFG->admin     = 'admin';
 
 $CFG->directorypermissions = 02775;
 
+$CFG->pathtophp = '/opt/bitnami/php/bin/php';
+
 $CFG->disableupdatenotifications = true;
 $CFG->disableupdateautodeploy = true;
-
-$CFG->pathtophp = '/opt/bitnami/php/bin/php';
 
 date_default_timezone_set('Asia/Jakarta');
 

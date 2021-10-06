@@ -1,0 +1,46 @@
+---
+- name : Ansible Install Docker
+  hosts: server           # merujuk ke klaster [server] inventory.yaml
+  become: yes             # sudo privilege
+  gather_facts: False     # basa-basi
+  remote_user: ubuntu     # user pada remote vm
+  tasks:
+    - name: copying file with playbook
+      ansible.builtin.copy: 
+        src: /home/andrianovsky/Documents/Moodle-on-AWS/Script/assets/file-transfer/
+        dest: /home/ubuntu/
+
+    - name: grant executable for install-docker.sh
+      command: chmod +x /home/ubuntu/install-docker.sh
+      register: workdir
+
+    - name: Install docker and docker compose
+      command: sh /home/ubuntu/install-docker.sh
+      register: dockerdeployment
+    - name: verbose installation docker
+      debug:
+        var: dockerdeployment.stdout
+
+
+      
+    # - name: Ping to target server
+    #   ping:
+    # - name: Install docker
+    #   apt:
+    #     update_cache: yes
+    #     name: 
+    #       - docker.io
+    #     user: name=docker
+    #           groups=ubuntu
+    #           append=yes
+    # - name: Enable docker systemctl
+    #   ansible.builtin.systemd:
+    #     name: docker
+    #     enabled: yes
+    #     masked: no 
+
+        # state: present
+    # - name : Download docker install script
+    #   shell : "curl -fsSL https://get.docker.com -o get-docker.sh"
+    # - name : Install docker using script
+    #   shell : "sh get-docker.sh"

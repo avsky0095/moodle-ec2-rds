@@ -16,3 +16,4 @@ Alur eksekusi:
 - run-script.sh
   - Docker
   - docker-compose up
+- vars.tf

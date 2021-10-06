@@ -2,7 +2,7 @@ version: '3.7'
 services:
   prometheus:
     container_name: prometheus_metric
-    image: prom/prometheus:v2.29.2
+    image: prom/prometheus:latest
     ports:
       - 9090:9090
     volumes: 
@@ -14,7 +14,7 @@ services:
     container_name: node_exporter
     ports: 
       - 9100:9100
-    image: prom/node-exporter:v1.2.2
+    image: prom/node-exporter:latest
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -29,7 +29,7 @@ services:
 
   grafana:
     container_name: grafana_monitor
-    image: grafana/grafana:8.1.2
+    image: grafana/grafana:latest
     ports: 
       - 3000:3000
     volumes:
@@ -44,7 +44,7 @@ services:
 
   moodle:
     container_name: moodle
-    image: andrianovsky/moodle-3.11.2:latest
+    image: andrianovsky/moodle-3.11.3:latest
     ports:
       - '80:8080'
     environment:
@@ -59,6 +59,9 @@ services:
       - MOODLE_DATABASE_USER=user
       - MOODLE_DATABASE_PASSWORD=user123!
       - ALLOW_EMPTY_PASSWORD=yes
+
+      # support satu db readreplica
+      # - MOODLE_DATABASE_READREPLICA_HOST=rds-moodle-readreplica.chngnw3p2ako.us-east-1.rds.amazonaws.com
       
       - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
       - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
@@ -68,7 +71,6 @@ services:
       - PHP_POST_MAX_SIZE=1024M
       - PHP_MAX_EXECUTION_TIME=120      
     volumes:
-      - /home/ubuntu/config.php:/bitnami/moodle/config.php
       - moodle_data:/bitnami/moodle
       - moodledata_data:/bitnami/moodledata
     networks: 
@@ -84,4 +86,3 @@ networks:
 volumes:
   moodle_data:
   moodledata_data:
-  mariadb_data:                    # def: overlay

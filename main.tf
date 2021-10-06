@@ -34,6 +34,8 @@ locals {
   engine_version          = "10.4.13"                           # Versi database
   parameter_group_name    = "default.mariadb10.4"
   instance_class          = "db.t2.small"                       # 1 CPU, 2 GB RAM
+                            // db.t2.medium                     # 2 CPU, 4 GB RAM
+                            // db.m1.small                      # 1 CPU, 1,7 GB RAM
 }
 
 
@@ -78,34 +80,34 @@ resource "aws_db_instance" "moodle-rds"  {
 # [2] AWS RDS - READ REPLICA INSTANCE DEPLOYMENT
 # ---------------------------------------------------------------
 
-resource "aws_db_instance" "moodle-rds-readreplica"  {
-  identifier              = "rds-moodle-readreplica"            # db host
-  replicate_source_db     = aws_db_instance.moodle-rds.id       # mereplika dari instance mana
+# resource "aws_db_instance" "moodle-rds-readreplica"  {
+#   identifier              = "rds-moodle-readreplica"            # db host
+#   replicate_source_db     = aws_db_instance.moodle-rds.id       # mereplika dari instance mana
 
-  # engine                  = local.engine                        # Database engine
-  # engine_version          = local.engine_version                # Versi database
+#   # engine                  = local.engine                        # Database engine
+#   # engine_version          = local.engine_version                # Versi database
 
-  # instance_class          = local.instance_class                # 1 CPU, 2 GB RAM
-  # storage_type            = "gp2"                               # General Purpose 2
-  # allocated_storage       = 5             
-  # max_allocated_storage   = 0                                   # disable autoscaling
+#   instance_class          = local.instance_class                # 1 CPU, 2 GB RAM
+#   # storage_type            = "gp2"                               # General Purpose 2
+#   # allocated_storage       = 5             
+#   # max_allocated_storage   = 0                                   # disable autoscaling
 
-  name                    = "db_moodle_rr"                      # db name
-  # username                = "user"
-  # password                = "user123!"
-  # availability_zone	      = "us-east-1f"
-  # port                    = "3306"
-  vpc_security_group_ids  = [aws_security_group.moodle-rds.id]
-  parameter_group_name    = local.parameter_group_name
+#   name                    = "db_moodle_rr"                      # db name
+#   # username                = "user"
+#   # password                = "user123!"
+#   # availability_zone	      = "us-east-1f"
+#   # port                    = "3306"
+#   vpc_security_group_ids  = [aws_security_group.moodle-rds.id]
+#   parameter_group_name    = local.parameter_group_name
 
-  monitoring_interval                 = 0
-  maintenance_window                  = null                    # mematikan maintenance
-  backup_window                       = null                    # mematikan backup
-  apply_immediately                   = true                    # menerapkan perubahan segera
-  skip_final_snapshot                 = true                    # skip snapshot
-  publicly_accessible                 = true                    # diakses publik
-  storage_encrypted                   = false
-  iam_database_authentication_enabled = false
-  auto_minor_version_upgrade          = false                   # mematikan pembaharuan minor
-  deletion_protection                 = false                   # mematikan proteksi penghapusan
-}
+#   monitoring_interval                 = 0
+#   maintenance_window                  = null                    # mematikan maintenance
+#   backup_window                       = null                    # mematikan backup
+#   apply_immediately                   = true                    # menerapkan perubahan segera
+#   skip_final_snapshot                 = true                    # skip snapshot
+#   publicly_accessible                 = true                    # diakses publik
+#   storage_encrypted                   = false
+#   iam_database_authentication_enabled = false
+#   auto_minor_version_upgrade          = false                   # mematikan pembaharuan minor
+#   deletion_protection                 = false                   # mematikan proteksi penghapusan
+# }

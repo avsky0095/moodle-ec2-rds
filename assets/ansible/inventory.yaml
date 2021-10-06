@@ -1,8 +1,0 @@
-server:
-  hosts:
-    35.173.250.206:
-    # localhost:
-    
-  vars:
-    ansible_ssh_private_key_file: ../verifykeys/ec2-moodle.pem
-    ansible_user: ubuntu
