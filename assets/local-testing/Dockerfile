@@ -1,20 +1,26 @@
 
-FROM bitnami/moodle:3.11.3
+# FROM bitnami/moodle:3.11.3
+FROM erseco/alpine-moodle:latest
 # Copy dari local file
 
 # ADMIN OpCache
-# BLOCKS Admin Presets
-# CONFIGS config-dist.php, php.ini
 # COURSE bulkdelete.php
 # MOD Attendance, Big Blue Button bn, Jitsi, Oublog, Questionnaire, Subcourse, Webexactivity, Zoom
 # REPORT Moodle Benchmark
-# THEME Fordson
 
-COPY ./assets/moodle/ /opt/bitnami/moodle/
-COPY ./assets/opt/ /opt/bitnami/opt/
-COPY ./config-dist.php /opt/bitnami/moodle/config-dist.php
-COPY ./php.ini /opt/bitnami/php/etc
+# bitnami/moodle
+# COPY ./assets/moodle/ /opt/bitnami/moodle/
 
-USER root
-ENTRYPOINT [ "/opt/bitnami/scripts/moodle/entrypoint.sh" ]
-CMD [ "/opt/bitnami/scripts/moodle/run.sh" ]
+ENV DB_PASS=
+
+# erseco alpine
+COPY ./assets/moodle/ /var/www/html/                
+
+# ENV client_max_body_size=50M	
+# ENV post_max_size=50M	
+# ENV upload_max_filesize=50M	
+# ENV max_input_vars=1000
+
+# USER root
+# ENTRYPOINT [ "/opt/bitnami/scripts/moodle/entrypoint.sh" ]
+# CMD [ "/opt/bitnami/scripts/moodle/run.sh" ]

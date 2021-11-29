@@ -1,88 +1,24 @@
 version: '3.7'
+
 services:
-  prometheus:
-    container_name: prometheus_metric
-    image: prom/prometheus:latest
-    ports:
-      - 9090:9090
-    volumes: 
-      - /home/ubuntu/prometheus.yml:/etc/prometheus/prometheus.yml      # local ubuntu > docker prom
-    networks: 
-      - net
-
-  node_exporter:
-    container_name: node_exporter
-    ports: 
-      - 9100:9100
-    image: prom/node-exporter:latest
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--collector.filesystem.ignored-mount-points"
-      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
-    networks: 
-      - net
-
-  grafana:
-    container_name: grafana_monitor
-    image: grafana/grafana:latest
-    ports: 
-      - 3000:3000
-    volumes:
-      - /home/ubuntu/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - /home/ubuntu/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    networks: 
-      - net
-
   moodle:
     container_name: moodle
-    image: andrianovsky/moodle-3.11.3:latest
+    image: andrianovsky/alpine-moodle_3.11:latest         # erseco/alpine-moodle
     ports:
       - '80:8080'
     environment:
+      - DB_TYPE=mariadb
+      - DB_HOST=rds-moodle.c0jycdiknw8b.us-east-1.rds.amazonaws.com
+      - DB_PORT=3306
+      - DB_NAME=db_moodle
+      - DB_USER=user
+      - DB_PASS=user123!
+      - SITE_URL=http://${PUBLIC_DNS}
+      - MOODLE_SITENAME=Moodle-Test-Site
       - MOODLE_USERNAME=admin
       - MOODLE_PASSWORD=admin123
-      - MOODLE_EMAIL=user@student.id
-      - MOODLE_SITE_NAME=Moodle Test Site
-
-      - MOODLE_DATABASE_HOST=rds-moodle.chngnw3p2ako.us-east-1.rds.amazonaws.com
-      - MOODLE_DATABASE_PORT_NUMBER=3306
-      - MOODLE_DATABASE_NAME=db_moodle                   
-      - MOODLE_DATABASE_USER=user
-      - MOODLE_DATABASE_PASSWORD=user123!
-      - ALLOW_EMPTY_PASSWORD=yes
-
-      # support satu db readreplica
-      # - MOODLE_DATABASE_READREPLICA_HOST=rds-moodle-readreplica.chngnw3p2ako.us-east-1.rds.amazonaws.com
-      
-      - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
-      - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
-      - BITNAMI_DEBUG=true                                # tampilkan log
-
-      - PHP_UPLOAD_MAX_FILESIZE=2048M
-      - PHP_POST_MAX_SIZE=1024M
-      - PHP_MAX_EXECUTION_TIME=120      
-    volumes:
-      - moodle_data:/bitnami/moodle
-      - moodledata_data:/bitnami/moodledata
-    networks: 
-      - net
-    restart: always                                       # restart container moodle ketika gagal connect mysql
-                                                          # lantaran sedang create AWS RDS hingga ready
-
-networks: 
-  net:
-    name: moodle_net
-    driver: bridge
-
-volumes:
-  moodle_data:
-  moodledata_data:
+      - client_max_body_size=100M
+      - post_max_size=100M
+      - upload_max_filesize=100M
+      - max_input_vars=1000
+    restart: always

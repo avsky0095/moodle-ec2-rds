@@ -3,8 +3,9 @@
 #
 # Hanya untuk keperluan pengujian lokal
 #
+version: '3.7'
 
-networks: 
+networks:
   net:
     name: moodle_net
     driver: bridge
@@ -12,215 +13,183 @@ networks:
 volumes:
   moodle_data:
   moodledata_data:
-  mariadb_data:                    # def: local
-  mariadb_data_rr:                    
-  # prom_data:
-  # grafana_data:
-  # redis_data:
+  mariadb_data:
+  mariadb_data_rr:
 
-version: '3.9'
 services:
   mariadb_master:
-    container_name: mariadb
-    # hostname: mariadb_master
+    container_name: mariadb_master
     image: 'bitnami/mariadb:10.5'
-    ports: 
+    ports:
       - '3306/tcp'
-    environment: 
+    environment:
       - MARIADB_REPLICATION_MODE=master
       - MARIADB_REPLICATION_USER=repl_user
+
       - MARIADB_USER=user
       - MARIADB_DATABASE=db
+      - ALLOW_EMPTY_PASSWORD=yes                # for development purpose only
+      - MARIADB_ROOT_PASSWORD=pass
       
-      - ALLOW_EMPTY_PASSWORD=yes        # for development purpose only
-      # - MARIADB_SKIP_TEST_DB=yes
-      
-      - MARIADB_ROOT_PASSWORD=masterpw
-      # - MARIADB_ROOT_USER=root
       # - MARIADB_PASSWORD=pass
-      # - MARIA 
-    volumes: 
-      - /etc/localtime:/etc/localtime      
+      # - MARIADB_ROOT_USER=root
+      # - MARIADB_SKIP_TEST_DB=yes
+      # - MARIADB_REPLICATION_PASSWORD=repl_password
+    volumes:
+      - /etc/localtime:/etc/localtime
       - mariadb_data:/bitnami/mariadb
-    networks: 
+    networks:
       - net
 
   mariadb_readreplica:
-    depends_on: 
+    depends_on:
       - mariadb_master
     container_name: mariadb_readreplica
-    # hostname: mariadb_readreplica
     image: 'bitnami/mariadb:10.5'
-    ports: 
+    ports:
       - '3306/tcp'
-    environment: 
+    environment:
       - MARIADB_REPLICATION_MODE=slave
       - MARIADB_REPLICATION_USER=repl_user
+
       - MARIADB_USER=user
       - MARIADB_DATABASE=db
-
       - ALLOW_EMPTY_PASSWORD=yes
+      
+      - MARIADB_MASTER_HOST=mariadb_master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=pass
+
+      # - MARIADB_MASTER_ROOT_USER=root
+      # - MARIADB_REPLICATION_PASSWORD=repl_password
       # - MARIADB_PASSWORD=pass
       # - MARIADB_SKIP_TEST_DB=yes
       # - MARIADB_ROOT_USER=root
-      # - MARIADB_REPLICATION_PASSWORD=repl_password
-
-      - MARIADB_MASTER_HOST=mariadb_master
-      - MARIADB_MASTER_PORT_NUMBER=3306
-      - MARIADB_MASTER_ROOT_PASSWORD=masterpw        
-    volumes: 
+    volumes:
       - /etc/localtime:/etc/localtime
       - mariadb_data_rr:/bitnami/mariadb
-    networks: 
-      - net      
+    networks:
+      - net
+    restart: always
 
-  moodle:
-    depends_on: 
+  moodle_alpine:
+    depends_on:
       - mariadb_master
-    image: andrianovsky/moodle-3.11.3:latest
-    # image: bitnami/moodle:3.11.3
-    container_name: moodle
-    ports:
-      - 80:8080
+    container_name: moodle_alpine
+    image: andrianovsky/alpine-moodle_3.11:latest     # from erseco/alpine-moodle
+    restart: unless-stopped
     environment:
+      - DB_TYPE=mariadb
+      - DB_HOST=mariadb_master
+      - DB_PORT=3306
+      - DB_NAME=db
+      - DB_USER=user
+      # - DB_PASS=pass
+      - SITE_URL=http://${PUBLIC_DNS:-localhost}      # jika public dns belum di-set, akan jadi localhost
+      - MOODLE_SITENAME=New-Site
       - MOODLE_USERNAME=admin
       - MOODLE_PASSWORD=admin123
-      - MOODLE_EMAIL=user@student.com
-      - MOODLE_SITE_NAME=Moodle Test Site
-
-      - MOODLE_DATABASE_HOST=mariadb_master
-      - MOODLE_DATABASE_PORT_NUMBER=3306
-      - MOODLE_DATABASE_NAME=db                   
-      - MOODLE_DATABASE_USER=user
-      # - MOODLE_DATABASE_PASSWORD=user123!
-      - ALLOW_EMPTY_PASSWORD=yes
-
-      # support satu db readreplica
-      - MOODLE_DATABASE_READREPLICA_HOST=mariadb_readreplica
-      # - MOODLE_DATABASE_READREPLICA_PORT=3306
-      # - MOODLE_DATABASE_READREPLICA_USER=user
-      # - MOODLE_DATABASE_READREPLICA_PASSWORD=masterpw
-
-      - PHP_UPLOAD_MAX_FILESIZE=2048M
-      - PHP_POST_MAX_SIZE=1024M
-      - PHP_MAX_EXECUTION_TIME=120
-      - PHP_ENABLE_OPCACHE=1
-      - PHP_MEMORY_LIMIT=192M
-      
-      - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
-      - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
-      - BITNAMI_DEBUG=true
-    volumes:
-      - /etc/localtime:/etc/localtime
-
-      - moodle_data:/bitnami/moodle
-      - moodledata_data:/bitnami/moodledata
-    networks: 
-      - net
-    restart: always
-
-  prometheus:
-    container_name: prometheus_metric
-    image: prom/prometheus:v2.29.2
     ports:
-      - 9090:9090
-    # environment:
-    volumes: 
-     - ./configs/prometheus:/etc/prometheus
-    #  - prom_data:/prometheus
-    networks: 
-      - net
-
-  node_exporter:
-    container_name: node_exporter
-    ports: 
-      - 9100:9100
-    image: prom/node-exporter:v1.2.2
+      - 80:8080
     volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--collector.filesystem.ignored-mount-points"
-      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
-    restart: unless-stopped
-    # network_mode: host
-    networks: 
+      - moodle_data:/var/www/html
+      - moodledata_data:/var/www/moodledata
+    networks:
       - net
 
-  # cadvisor:
-  #   image: gcr.io/cadvisor/cadvisor:v0.40.0
-  #   container_name: cadvisor
+  # moodle: //bitnami
+  #   depends_on:
+  #     - mariadb_master
+  #   # image: bitnami/moodle:latest
+  #   image: andrianovsky/moodle-3.11.3:latest
+  #   # container_name: moodle
   #   ports:
-  #     - "8100:8100"
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:ro
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #     - /dev/disk/:/dev/disk:ro
-  #   devices:
-  #     - /dev/kmsg
+  #     - 80:8080
+  #   environment:
+  #     - MOODLE_USERNAME=admin
+  #     - MOODLE_PASSWORD=admin123
+  #     - MOODLE_EMAIL=user@student.com
+  #     - MOODLE_SITE_NAME=Moodle Test Site
+
+  #     # - MOODLE_DATABASE_HOST=mysql_master
+  #     - MOODLE_DATABASE_HOST=mariadb_master
+  #     - MOODLE_DATABASE_PORT_NUMBER=3306
+  #     - MOODLE_DATABASE_NAME=db
+  #     - MOODLE_DATABASE_USER=user
+  #     - MOODLE_DATABASE_PASSWORD=pass
+  #     # - ALLOW_EMPTY_PASSWORD=yes
+
+  #     - PHP_UPLOAD_MAX_FILESIZE=2048M
+  #     - PHP_POST_MAX_SIZE=1024M
+  #     - PHP_MAX_EXECUTION_TIME=120
+  #     - PHP_ENABLE_OPCACHE=1
+  #     - PHP_MEMORY_LIMIT=192M
+
+  #     - MOODLE_SKIP_BOOTSTRAP=no                          # tidak skip ketika membuat database pertama kali
+  #     - MOODLE_SKIP_INSTALL=yes                           # skip instal database jika existed
+  #     - BITNAMI_DEBUG=true
+  #   # volumes:
+  #   #   - /etc/localtime:/etc/localtime
+  #   #   - moodle_data:/bitnami/moodle
+  #   #   - moodledata_data:/bitnami/moodledata
   #   networks:
   #     - net
-      
-  grafana:
-    container_name: grafana_monitor
-    image: grafana/grafana:8.1.2
-    ports: 
-      - 3000:3000
-    volumes:
-      # - grafana_data:/var/lib/grafana
-      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    networks: 
-      - net
+  #   restart: always
 
-  phpmyadmin:
-    container_name: myadmin
-    image: phpmyadmin:latest
-    ports: 
-      - 8081:80
-    # volumes:
-    #   -
-    environment:
-      - PMA_USER=user
-      - PMA_HOSTS=mariadb_master,mariadb_readreplica
-    networks: 
-      - net
-    restart: always
-
-  # jmeter:
-  #   container_name: jmeter_test
-  #   image: justb4/jmeter:latest
-  #   # ports: 
-  #   #   - 3000:3000
+  # prometheus:
+  #   container_name: prometheus_metric
+  #   image: prom/prometheus:v2.29.2
+  #   ports:
+  #     - 9090:9090
+  #   # environment:
   #   volumes:
-  #     # - grafana_data:/var/lib/grafana
+  #    - ./configs/prometheus:/etc/prometheus
+  #   networks:
+  #     - net
+
+  # node_exporter:
+  #   container_name: node_exporter
+  #   ports:
+  #     - 9100:9100
+  #   image: prom/node-exporter:v1.2.2
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - "--path.procfs=/host/proc"
+  #     - "--path.sysfs=/host/sys"
+  #     - "--collector.filesystem.ignored-mount-points"
+  #     - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+  #   restart: unless-stopped
+  #   networks:
+  #     - net
+
+  # grafana:
+  #   container_name: grafana_monitor
+  #   image: grafana/grafana:8.1.2
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
   #     - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
   #     - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
   #   environment:
-  #     - JMETER_VERSION=5.4
-  #     - IMAGE_TIMEZONE="Asia/Jakarta"
-  #   networks: 
+  #     - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+  #     - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   networks:
   #     - net
 
-  # redis:
-  #   container_name: redis_test
-  #   image: bitnami/redis:6.0.15
-  #   ports: 
-  #     - 6379:6379
-  #   environment: 
-  #     - ALLOW_EMPTY_PASSWORD=yes
-  #     # - REDIS_PORT_NUMBER=7000
-  #     # - REDIS_PASSWORD=yes
-  #   volumes: 
-  #     - redis_data:/bitnami/redis/data  
-  #   networks: 
+  # phpmyadmin:
+  #   container_name: myadmin
+  #   image: phpmyadmin:latest
+  #   ports:
+  #     - 8081:80
+  #   environment:
+  #     - PMA_USER=user
+  #     - PMA_HOSTS=mariadb_master,mariadb_readreplica
+  #   networks:
   #     - net
+  #   restart: always
+
+

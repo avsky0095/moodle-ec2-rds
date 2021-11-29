@@ -18,7 +18,7 @@ provider "aws" {
 
 
 # ---------------------------------------------------------------
-# PROVISIONING / MOODLE DOCKER COMPOSE + MONITORING DEPLOYMENT
+# PROVISIONING / MOODLE DOCKER COMPOSE
 # ---------------------------------------------------------------
 
 resource "null_resource" "moodle-compose-up" {
@@ -26,7 +26,7 @@ resource "null_resource" "moodle-compose-up" {
     aws_instance.moodle-ec2
   ]
 
-  provisioner "file" {                                                  # file docker-compose.yml, install-docker.sh, prometheus.yml
+  provisioner "file" {                                                  # file docker-compose.yml, install-docker.sh, config.php
     source                = "assets/file-transfer/"                     # transfer folder ke direktori
     destination           = "/home/ubuntu/"
   }
@@ -39,11 +39,12 @@ resource "null_resource" "moodle-compose-up" {
   }
 
   connection {
+    agent                 = false
     type                  = "ssh"
     user                  = "ubuntu"
     password              = ""
     host                  = "${aws_instance.moodle-ec2.public_dns}"
-    private_key           = file("assets/verifykeys/ec2-moodle.pem")                     # lokasi file private key
+    private_key           = file("assets/verifykeys/newkeyec2moodle.pem")                     # lokasi file private key
   }  
 }
 
@@ -64,19 +65,20 @@ output "rds_address" {
   value                   = [aws_db_instance.moodle-rds.address]
 }
 
-# output "rds_address_rr" {
-#   description             = "The hostname of the RDS instance"
-#   value                   = [aws_db_instance.moodle-rds-readreplica.address]
-# }
-
-
-#----- ANSIBLE GET IP
-
-resource "local_file" "AnsibleInventory" {
-  filename = "assets/ansible/inventory.yaml"
-  content = templatefile("assets/ansible/inventory.tpl",
-    {
-      ec2-pub-ip = aws_instance.moodle-ec2.public_dns
-    }
-  )
+output "rds_address_rr" {
+  description             = "The hostname of the RDS instance"
+  value                   = [aws_db_instance.moodle-rds-readreplica.address]
 }
+
+
+#----- INSTANCES GET IP
+
+# resource "local_file" "docker-compose" {
+#   filename = "assets/file-transfer/docker-compose.yml"
+#   content = templatefile("assets/file-transfer/docker-compose.tpl",
+#     {
+#       ec2-pub-ip = aws_instance.moodle-ec2.public_dns
+#       rds-pub-ip = aws_db_instance.moodle-rds.address
+#     }
+#   )
+# }

@@ -1,9 +1,9 @@
 
 # assets files
 assets/x-archives
+assets/ansible/inventory.yaml
 assets/local-testing/assets
 assets/local-testing/ec2-testing/*
-
 assets/verifykeys/*
 !assets/verifykeys/README.md
 

@@ -1,40 +1,27 @@
-#!/bin/bash
+#!/bin/sh
 
 export LC_ALL=C
 sudo apt update -y
 
-# buat swapfile 512 MB
+# print ec2 public dns ke dalam env untuk deployment docker erseco/alpinemoodles
 
-echo "[CREATE] Swap File 512 MB"
-
-sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=512       # swap 512 MB
-sudo /sbin/mkswap /var/swap.1                                  # if=input_file, of=output_file
-sudo chmod 600 /var/swap.1                                     # bs=block_size
-sudo /sbin/swapon /var/swap.1
+echo PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname) > .env
 
 # docker
 
-echo "[INSTALL] Docker"
+echo "[INSTALL] Docker dan Docker Compose"
 
-sudo apt install -y docker.io
+sudo apt install -y docker.io docker-compose
 sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
 sudo systemctl start docker
-
-# docker compose
-
-echo "[INSTALL] docker-compose"
-
-sudo apt install -y docker-compose
-sudo systemctl restart docker
 sudo docker-compose up -d
 
-# copy config.php to container moodle, readreplica
+sleep 200                               # detik, proses instalasi hingga  moodle selesai
 
-# sleep 200    # replace config.php setelah menunggu instalasi moodle selesai
-# echo "[COPY] config.php -> Docker container moodle"
+# copy config.php berisi konfig read-replica ke docker moodle
+echo "[COPY] config.php -> Docker container moodle"
 
-# sudo docker cp config.php moodle:/bitnami/moodle/config.php
+sudo docker cp config.php moodle:/var/www/html/config.php
 # sudo docker restart moodle
 
-# docker restart after copy 
