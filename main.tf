@@ -9,9 +9,10 @@ resource "aws_instance" "moodle-ec2" {
   }
 
   ami                     = "ami-09e67e426f25ce0d7"             # Ubuntu 20.04 LTS 64 bit
+  # ami                     = "ami-0ed9277fb7eb570c9"             # Amazon Linux 2 AMI (HVM)
   instance_type           = "t2.small"                          # 1 CPU, 2 RAM
   key_name                = "newkeyec2moodle"                   # aws private key 
-  vpc_security_group_ids  = [aws_security_group.moodle-ec2.id]  # Security group rules
+  vpc_security_group_ids  = [aws_security_group.moodle-ec2-sg.id]  # Security group rules
   availability_zone       = "us-east-1f"                        # Northern Virginia, US
 
   ebs_block_device {                                            # Storage device
@@ -27,17 +28,18 @@ resource "aws_instance" "moodle-ec2" {
 
 
 
-# locals ------
-
-locals {
-  instance_class          = "db.t2.small"                       # 1 CPU, 2 GB RAM
-                            // db.t2.medium                     # 2 CPU, 4 GB RAM
-}
 
 
 # ---------------------------------------------------------------
 # [1] AWS RDS - MAIN INSTANCE DEPLOYMENT
 # ---------------------------------------------------------------
+
+# locals ------
+
+locals {
+  instance_class          = "db.t2.small"                       # 1 CPU, 2 GB RAM
+  # instance_class          = "db.t2.medium"                       # 2 CPU, 4 GB RAM
+}
 
 resource "aws_db_instance" "moodle-rds"  {
   identifier              = "rds-moodle"                        # db host
@@ -55,7 +57,7 @@ resource "aws_db_instance" "moodle-rds"  {
   password                = "user123!"
   availability_zone	      = "us-east-1f"
   port                    = "3306"
-  vpc_security_group_ids  = [aws_security_group.moodle-rds.id]
+  vpc_security_group_ids  = [aws_security_group.moodle-rds-sg.id]
 
   apply_immediately           = true                    # menerapkan perubahan segera
   skip_final_snapshot         = true                    # skip snapshot
@@ -77,7 +79,7 @@ resource "aws_db_instance" "moodle-rds-readreplica"  {
 
   instance_class          = local.instance_class                # 1 CPU, 2 GB RAM
   name                    = "db_moodle_rr"                      # db name
-  vpc_security_group_ids  = [aws_security_group.moodle-rds.id]
+  vpc_security_group_ids  = [aws_security_group.moodle-rds-sg.id]
 
   apply_immediately           = true                    # menerapkan perubahan segera
   skip_final_snapshot         = true                    # skip snapshot

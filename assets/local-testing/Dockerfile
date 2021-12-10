@@ -11,7 +11,7 @@ FROM erseco/alpine-moodle:latest
 # bitnami/moodle
 # COPY ./assets/moodle/ /opt/bitnami/moodle/
 
-ENV DB_PASS=
+# ENV DB_PASS=
 
 # erseco alpine
 COPY ./assets/moodle/ /var/www/html/                
