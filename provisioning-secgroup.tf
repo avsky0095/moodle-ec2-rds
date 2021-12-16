@@ -16,6 +16,7 @@ provider "aws" {
   shared_credentials_file = "assets/verifykeys/aws-credentials"   # alamat file credentials AWSEducate
 }
 
+
 # ---------------------------------------------------------------
 # PROVISIONING
 # ---------------------------------------------------------------
@@ -40,7 +41,7 @@ resource "null_resource" "moodle-compose-up" {
   connection {
     agent                 = false
     type                  = "ssh"
-    user                  = "ubuntu"
+    user                  = "ubuntu"  //"ec2-user" untuk amilinux2
     password              = ""
     host                  = "${aws_instance.moodle-ec2.public_dns}"
     private_key           = file("assets/verifykeys/newkeyec2moodle.pem")                     # lokasi file private key
