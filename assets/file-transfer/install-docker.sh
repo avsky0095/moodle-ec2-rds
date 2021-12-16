@@ -1,13 +1,12 @@
 #!/bin/sh
 
-export LC_ALL=C
-sudo apt update -y
+localectl set-locale LC_TIME="id_ID.UTF-8"
 
 echo PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname) > .env
 
-# docker
 echo "[INSTALL] Docker dan Docker Compose"
 
+sudo apt update -y
 sudo apt install -y docker.io docker-compose make sysstat mysql-client
 sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
@@ -21,7 +20,7 @@ sleep 200
 
 sudo docker cp config.php moodle:/var/www/html/config.php
 
-
+# docker exec -it moodle sh
 
 
 # # ami linux 2, yum
