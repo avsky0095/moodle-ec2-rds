@@ -3,7 +3,7 @@ version: '3.7'
 services:
   moodle:
     container_name: moodle
-    image: andrianovsky/alpine-moodle_3.11:latest         # erseco/alpine-moodle
+    image: erseco/alpine-moodle:latest         # erseco/alpine-moodle
     ports:
       - '80:8080'
     environment:
@@ -15,6 +15,6 @@ services:
       - DB_PASS=${DB_PASS}
       - SITE_URL=http://${PUBLIC_DNS}
       - MOODLE_SITENAME=Moodle-Test-Site
-      - MOODLE_USERNAME=${MOD_USER}
-      - MOODLE_PASSWORD=${MOD_PASS}
-    restart: always
+      - MOODLE_USERNAME=${MDL_USER}
+      - MOODLE_PASSWORD=${MDL_PASS}
+    restart: unless-stopped
