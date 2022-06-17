@@ -3,7 +3,7 @@ version: '3.7'
 services:
   moodle:
     container_name: moodle
-    image: erseco/alpine-moodle:latest         # erseco/alpine-moodle
+    image: erseco/alpine-moodle:latest          # erseco/alpine-moodle
     ports:
       - '80:8080'
     environment:
