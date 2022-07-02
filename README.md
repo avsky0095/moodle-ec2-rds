@@ -1,3 +1,6 @@
+
+PROJECT MOODLE SEDERHANA EC2 DAN RDS (PROJECT SKRIPSI/TA)
+
 # moodle-ec2-rds
 Terraform configuration script
 

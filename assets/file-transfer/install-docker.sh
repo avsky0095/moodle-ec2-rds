@@ -2,8 +2,6 @@
 
 localectl set-locale LC_TIME="id_ID.UTF-8"
 
-echo PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname) > .env
-
 echo "[INSTALL] Docker dan Docker Compose"
 
 sudo apt update -y
@@ -19,6 +17,17 @@ sleep 200
 # echo "[COPY] config.php -> Docker container moodle"
 
 sudo docker cp config.php moodle:/var/www/html/config.php
+
+
+
+
+
+
+
+
+
+
+
 
 # docker exec -it moodle sh
 
