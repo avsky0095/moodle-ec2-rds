@@ -27,7 +27,7 @@ resource "aws_instance" "moodle-ec2" {
   user_data = <<USERDATA
               #!/bin/bash
               apt update -y 
-              echo "PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)" > .env
+              echo "PUBLIC_DNS=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)" >> .env
               echo "DB_HOST=${aws_db_instance.moodle-rds.address}" > .env
               echo "DB_NAME=${aws_db_instance.moodle-rds.name}" > .env
               echo "DB_USER=${aws_db_instance.moodle-rds.username}" > .env

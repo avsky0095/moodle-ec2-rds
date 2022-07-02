@@ -17,19 +17,19 @@ $CFG->dboptions = array (
   'dbsocket' => '',
   'dbcollation' => 'utf8_general_ci',
   'connecttimeout' => null,
-  'readonly' => [          // Set to read-only slave details, to get safe reads
-                             // from there instead of the master node. Optional.
-                             // Currently supported by pgsql and mysqli variety classes.
-                             // If not supported silently ignored.
-    'instance' => [        // Readonly slave connection parameters
-      [
-        'dbhost' => "rds-moodle-readreplica.c0jycdiknw8b.us-east-1.rds.amazonaws.com",
-        'dbport' => getenv("DB_PORT"),    // Defaults to master port
-        'dbuser' => getenv("DB_USER"),    // Defaults to master user
-        'dbpass' => getenv("DB_PASS"),    // Defaults to master password
-      ],
-    ],
-  ],
+  // 'readonly' => [          // Set to read-only slave details, to get safe reads
+  //                            // from there instead of the master node. Optional.
+  //                            // Currently supported by pgsql and mysqli variety classes.
+  //                            // If not supported silently ignored.
+  //   'instance' => [        // Readonly slave connection parameters
+  //     [
+  //       'dbhost' => getenv("DB_RR_PORT"), // NOT YET DEFINED
+  //       'dbport' => getenv("DB_PORT"),    // Defaults to master port
+  //       'dbuser' => getenv("DB_USER"),    // Defaults to master user
+  //       'dbpass' => getenv("DB_PASS"),    // Defaults to master password
+  //     ],
+  //   ],
+  // ],
 );
 
 $CFG->wwwroot   = getenv("SITE_URL");

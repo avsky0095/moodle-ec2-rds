@@ -34,14 +34,14 @@ resource "null_resource" "moodle-compose-up" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x install-docker.sh",
-      "./install-docker.sh"
+      "./install_docker.sh"
     ]
   }
 
   connection {
     agent                 = false
     type                  = "ssh"
-    user                  = "ubuntu"  //"ec2-user" untuk amilinux2
+    user                  = "ubuntu"
     password              = ""
     host                  = "${aws_instance.moodle-ec2.public_dns}"
     private_key           = file("assets/verifykeys/${var.keypair}.pem")                     # lokasi file private key
