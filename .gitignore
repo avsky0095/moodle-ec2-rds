@@ -6,6 +6,7 @@ assets/local-testing/assets
 assets/local-testing/ec2-testing/*
 assets/verifykeys/*
 !assets/verifykeys/README.md
+backup
 
 # Local .terraform directories
 **/.terraform/*
